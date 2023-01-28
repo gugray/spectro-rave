@@ -1,0 +1,47 @@
+:root {
+  --tophdiv: 25%;
+  --btmhdiv: 70%;
+  --vdiv: 40%;
+}
+
+@bgColor1: #181818;
+@bgColor2: #202020;
+@txtColor: #606060;
+
+*, *:before, *:after { box-sizing: border-box; }
+html, body { width: 100%; height: 100%; margin: 0; padding: 0; }
+body {
+  background-color: @bgColor1;
+  display: flex; flex-direction: column; align-items: center; justify-content: flex-start;
+  font-family: monospace; font-size: 16px; color: @txtColor;
+}
+main { width: 50%; aspect-ratio: 16/10; background-color: @bgColor1; margin-top: 30px; position: relative; }
+section { width: 50%; background-color: @bgColor2; margin-top: 10px; }
+body.full { main, section { width: 80%; } }
+#cmd {
+  border: 0; background-color: inherit; border: 0;
+  padding: 4px 6px; width: 100%; font: inherit; color: inherit;
+  &:focus { -webkit-box-shadow: none; box-shadow: none; outline: none; }
+}
+section p {
+  margin: 0; padding: 6px 0 2px 6px; border-top: 1px solid hsl(120, 0%, 21%);
+}
+
+canvas { position: absolute; display: block; background-color: black; }
+#cnva {
+  width: calc(var(--tophdiv) - 5px);
+  height: calc(40% - 5px); top: 0; left: 0;
+}
+#cnvb
+{
+  width: calc(100% - var(--tophdiv) - 5px);
+  height: calc(40% - 5px); top: 0; right: 0;
+}
+#cnvc {
+  width: calc(var(--btmhdiv) - 5px);
+  height: calc(100% - var(--vdiv) - 5px); bottom: 0; left: 0;
+}
+#cnvd {
+  width: calc(100% - var(--btmhdiv) - 5px);
+  height: calc(100% - var(--vdiv) - 5px); bottom: 0; right: 0;
+}

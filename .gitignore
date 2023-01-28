@@ -1,0 +1,13 @@
+.DS_Store
+node_modules
+public
+.idea
+
+sketch.js
+sketch.js.map
+
+data/card*
+pub/data/card*
+exports
+fxhash/
+fxhash-gentoken.zip
