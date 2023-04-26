@@ -1,5 +1,5 @@
 import {G} from "./global.js";
-import {VizBox} from "./viz-box.js";
+import {ShaderVizBox} from "./shader-viz-box.js";
 
 // const audioFile = "data-scale.wav";
 let audioCtx, source, scriptNode;
@@ -37,6 +37,22 @@ function parseCommand(cmd) {
     document.documentElement.requestFullscreen();
   else if (cmd == "mic")
     openMic();
+  else if (cmd == "shuffle") {
+    let tophVal = 0, btmhVal = 0;
+    while (Math.abs(tophVal - btmhVal) < 20) {
+      tophVal = Math.round(25 + 50 * Math.random());
+      btmhVal = Math.round(25 + 50 * Math.random());
+    }
+    const vVal = Math.round(15 + 70 * Math.random());
+    document.documentElement.style.setProperty("--tophdiv", tophVal + "%");
+    document.documentElement.style.setProperty("--btmhdiv", btmhVal + "%");
+    document.documentElement.style.setProperty("--vdiv", vVal + "%");
+  }
+  else if (cmd == "a" || cmd == "b" || cmd == "c" || cmd == "d") {
+    let vizBoxIx = "abcd".indexOf(cmd);
+    vizBoxes[vizBoxIx].setVisible(true);
+    vizBoxes[vizBoxIx].setLooping(false);
+  }
   else {
     const parts = cmd.split(" ");
     if (parts.length < 2) return;
@@ -46,7 +62,13 @@ function parseCommand(cmd) {
     else if (parts[0] == "c") vizBox = vizBoxes[2];
     else if (parts[0] == "d") vizBox = vizBoxes[3];
     if (vizBox == null) return;
-    if (parts[1] == "fft") {
+    if (parts[1] == "off") {
+      vizBox.setVisible(false);
+    }
+    else if (parts[1] == "loop") {
+      vizBox.setLooping(true);
+    }
+    else if (parts[1] == "fft") {
       let fftSize = parseInt(parts[2]);
       if (isNaN(fftSize)) throw "not a number";
       vizBox.setFFTSize(fftSize);
@@ -72,10 +94,10 @@ function parseCommand(cmd) {
 }
 
 function initVizBoxes() {
-  vizBoxes.push(new VizBox(document.getElementById("cnva")));
-  vizBoxes.push(new VizBox(document.getElementById("cnvb")));
-  vizBoxes.push(new VizBox(document.getElementById("cnvc")));
-  vizBoxes.push(new VizBox(document.getElementById("cnvd")));
+  vizBoxes.push(new ShaderVizBox(document.getElementById("cnva")));
+  vizBoxes.push(new ShaderVizBox(document.getElementById("cnvb")));
+  vizBoxes.push(new ShaderVizBox(document.getElementById("cnvc")));
+  vizBoxes.push(new ShaderVizBox(document.getElementById("cnvd")));
 }
 
 function openMic() {
@@ -87,6 +109,7 @@ function openMic() {
     initVizBoxes();
     G.samples = new Float32Array(G.nSeconds * G.sampleRate);
     G.samplePos = 0;
+    G.sampleIx = 0;
     scriptNode = audioCtx.createScriptProcessor(2048, 1, 1);
     source.connect(scriptNode);
     // Next line is needed for this to work in Chrome
@@ -96,39 +119,17 @@ function openMic() {
       const data = e.inputBuffer.getChannelData(0);
       for (let i = 0; i < data.length; ++i) {
         G.samples[G.samplePos] = data[i];
-        ++G.samplePos;
-        if (G.samplePos == G.samples.length) G.samplePos = 0;
+        G.samplePos = (G.samplePos + 1) % G.samples.length;
       }
+      G.sampleIx += data.length;
     }
   }).catch((err) => {
     console.error(`Error from getUserMedia(): ${err}`);
   });
 }
 
-function onLoadAudio() {
-  audioCtx = new (window.AudioContext || window.webkitAudioContext)();
-  gain = audioCtx.createGain();
-  gain.connect(audioCtx.destination);
-  gain.gain.setValueAtTime(gainVal, audioCtx.currentTime);
-
-  const req = new XMLHttpRequest();
-  req.open('GET', audioFile, true);
-  req.responseType = 'arraybuffer';
-  req.onload = function () {
-    const audioData = req.response;
-    audioCtx.decodeAudioData(audioData).then(buf => {
-      buffer = buf;
-    }).catch(err => {
-      console.log("Error decoding audio data: " + err.err);
-    });
-  }
-  req.send();
-}
-
 function animate() {
 
-  // if (vizBoxes.length != 0)
-  //   vizBoxes[2].update();
   for (let i = 0; i < vizBoxes.length; ++i)
     vizBoxes[i].update();
 

@@ -3,6 +3,7 @@ const G = {
   samples: null,
   samplePos: null,
   sampleRate: 0,
+  sampleIx: 0,
 };
 
 export {G}

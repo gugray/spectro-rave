@@ -15,5 +15,6 @@
     "static-server": "^2.2.1"
   },
   "dependencies": {
+    "twgl.js": "^5.3.1"
   }
 }
